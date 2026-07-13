@@ -23,6 +23,13 @@
 
 ### Fixed
 
+- `qmd mcp` (stdio) now shuts down gracefully when stdin reaches EOF instead
+  of orphaning to PID 1 when the parent MCP client dies (#751): the server
+  closes its transport, gives in-flight request handlers a bounded window to
+  settle, closes the store (which disposes its llama.cpp instance), and lets
+  the process drain via `process.exitCode` (no forced `process.exit()`, which
+  has caused exit-time native crashes before).
+
 - `qmd --version` no longer reports an unrelated repository's commit (#787).
   The commit was discovered at runtime with `git -C <installDir> rev-parse`,
   and `git -C` walks *up*, so any install nested inside another checkout
@@ -43,17 +50,20 @@
   `qmd pull` next to each download) as invalid GGUF models. The model-cache
   check now only inspects real `.gguf` files, so a sidecar that happens to
   sort before the blob no longer poisons the report. #812
+
 - `qmd mcp stop` and `qmd mcp --http --daemon` now verify that a pidfile PID still belongs to a qmd process before signalling it or refusing to start. Recycled PIDs (common after reboot) are treated as stale: the pidfile is unlinked instead of SIGTERM'ing an unrelated process or blocking daemon start with a false "Already running" error (#806).
 
 - `qmd collection add` now rejects missing paths and regular files before
   creating collection configuration or index state. The error reports both the
   received and resolved path so malformed shell arguments can be corrected.
+
 - Claude Code plugin: scope the plugin `source` to `./skills` so installs
   copy just the skills (~50 KB) instead of the entire repository. Previously a
   canonical install materialized ~230 MB / 9,000+ items into
   `~/.claude/plugins/cache/` — including a full npm dependency install
   triggered by the repo-root `package.json`. Both skills (`qmd` and `release`)
   still ship, unchanged. (#790)
+
 - Claude Code plugin: releases now bump the plugin version in
   `.claude-plugin/marketplace.json` in lockstep with `package.json`. The
   plugin cache is keyed on this version, and it had been stuck at `0.1.0`
@@ -62,21 +72,6 @@
   today, despite the qmd skill nearly tripling in size since). Also bumps
   the plugin to `2.6.3` as a one-time catch-up so existing installs pick
   up the current skill on their next `claude plugin update`. (#789)
-- `qmd --version` no longer reports an unrelated repository's commit (#787).
-  The commit was discovered at runtime with `git -C <installDir> rev-parse`,
-  and `git -C` walks *up*, so any install nested inside another checkout
-  reported that checkout's HEAD — a global npm install under a git-managed
-  prefix such as Homebrew's `/opt/homebrew` claimed Homebrew's commit as
-  qmd's. Identical tarballs reported different "commits" depending only on
-  where they were installed, which is why one issue can collect three distinct
-  hashes for the same published build. `scripts/build.mjs` now stamps the
-  commit it built from into `dist/cli/build-info.json` (suffixed `-dirty` when
-  built from a modified tree), and the runtime prefers that. Source checkouts
-  still resolve their own HEAD, but only after confirming the enclosing
-  repository is qmd's; anything else reports no commit rather than a
-  misleading one. The lookup also no longer interpolates the install path into
-  a shell string, so a path containing a space stops silently dropping the
-  commit, and `--version` from a build runs no subprocess at all.
 
 ## [2.6.3] - 2026-06-24
 
@@ -263,7 +258,6 @@
 ### Fixes
 
 - Launcher: Rewrite `bin/qmd` as a Node-based shebang polyglot to fix global npm installation execution failures on Windows (#668 / #452), while supporting seamless fallback to Bun in Node-less environments.
-
 
 ## [2.5.1] - 2026-05-20
 
