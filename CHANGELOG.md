@@ -23,6 +23,13 @@
 
 ### Fixed
 
+- `qmd mcp` (stdio) now shuts down gracefully when stdin reaches EOF instead
+  of orphaning to PID 1 when the parent MCP client dies (#751): the server
+  closes its transport, gives in-flight request handlers a bounded window to
+  settle, closes the store (which disposes its llama.cpp instance), and lets
+  the process drain via `process.exitCode` (no forced `process.exit()`, which
+  has caused exit-time native crashes before).
+
 - `qmd --version` no longer reports an unrelated repository's commit (#787).
   The commit was discovered at runtime with `git -C <installDir> rev-parse`,
   and `git -C` walks *up*, so any install nested inside another checkout
