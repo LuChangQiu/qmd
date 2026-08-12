@@ -3,6 +3,23 @@
 ## [Unreleased]
 
 ### Fixed
+
+- `qmd --version` no longer reports an unrelated repository's commit (#787).
+  The commit was discovered at runtime with `git -C <installDir> rev-parse`,
+  and `git -C` walks *up*, so any install nested inside another checkout
+  reported that checkout's HEAD — a global npm install under a git-managed
+  prefix such as Homebrew's `/opt/homebrew` claimed Homebrew's commit as
+  qmd's. Identical tarballs reported different "commits" depending only on
+  where they were installed, which is why one issue can collect three distinct
+  hashes for the same published build. `scripts/build.mjs` now stamps the
+  commit it built from into `dist/cli/build-info.json` (suffixed `-dirty` when
+  built from a modified tree), and the runtime prefers that. Source checkouts
+  still resolve their own HEAD, but only after confirming the enclosing
+  repository is qmd's; anything else reports no commit rather than a
+  misleading one. The lookup also no longer interpolates the install path into
+  a shell string, so a path containing a space stops silently dropping the
+  commit, and `--version` from a build runs no subprocess at all.
+
 - `qmd doctor` no longer false-positives `.etag` HTTP sidecars (written by
   `qmd pull` next to each download) as invalid GGUF models. The model-cache
   check now only inspects real `.gguf` files, so a sidecar that happens to
