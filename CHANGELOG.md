@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `qmd collection add` now rejects missing paths and regular files before
+  creating collection configuration or index state. The error reports both the
+  received and resolved path so malformed shell arguments can be corrected.
+
 ## [2.6.3] - 2026-06-24
 
 ### Added
