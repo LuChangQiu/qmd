@@ -4,6 +4,11 @@
 
 ### Fixed
 
+- `qmd doctor` no longer false-positives `.etag` HTTP sidecars (written by
+  `qmd pull` next to each download) as invalid GGUF models. The model-cache
+  check now only inspects real `.gguf` files, so a sidecar that happens to
+  sort before the blob no longer poisons the report. #812
+
 - `qmd collection add` now rejects missing paths and regular files before
   creating collection configuration or index state. The error reports both the
   received and resolved path so malformed shell arguments can be corrected.
