@@ -3,11 +3,11 @@
 ## [Unreleased]
 
 ### Fixed
-
 - `qmd doctor` no longer false-positives `.etag` HTTP sidecars (written by
   `qmd pull` next to each download) as invalid GGUF models. The model-cache
   check now only inspects real `.gguf` files, so a sidecar that happens to
   sort before the blob no longer poisons the report. #812
+- `qmd mcp stop` and `qmd mcp --http --daemon` now verify that a pidfile PID still belongs to a qmd process before signalling it or refusing to start. Recycled PIDs (common after reboot) are treated as stale: the pidfile is unlinked instead of SIGTERM'ing an unrelated process or blocking daemon start with a false "Already running" error (#806).
 
 - `qmd collection add` now rejects missing paths and regular files before
   creating collection configuration or index state. The error reports both the
