@@ -18,6 +18,14 @@
   `~/.claude/plugins/cache/` — including a full npm dependency install
   triggered by the repo-root `package.json`. Both skills (`qmd` and `release`)
   still ship, unchanged. (#790)
+- Claude Code plugin: releases now bump the plugin version in
+  `.claude-plugin/marketplace.json` in lockstep with `package.json`. The
+  plugin cache is keyed on this version, and it had been stuck at `0.1.0`
+  since February — so installed plugins never received skill updates
+  (users who installed in February are still being served that snapshot
+  today, despite the qmd skill nearly tripling in size since). Also bumps
+  the plugin to `2.6.3` as a one-time catch-up so existing installs pick
+  up the current skill on their next `claude plugin update`. (#789)
 
 ## [2.6.3] - 2026-06-24
 
