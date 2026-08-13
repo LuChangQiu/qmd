@@ -23,6 +23,13 @@
 
 ### Fixed
 
+- `qmd embed` now takes an exclusive process lock (`.qmd-embed.lock` next to
+  the index DB) so concurrent invocations no longer race on `vectors_vec`
+  and fail with `UNIQUE constraint failed: vectors_vec.hash_seq`. A second
+  embed exits early with `Another embed process is already running. Skipping.`
+  Stale locks from crashed processes are recovered via PID identity checks
+  (#825).
+
 - windows prepare fix #778 keeps dist build #824
 
 - `qmd mcp` (stdio) now shuts down gracefully when stdin reaches EOF instead
