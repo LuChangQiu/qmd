@@ -23,6 +23,8 @@
 
 ### Fixed
 
+- windows prepare fix #778 keeps dist build #824
+
 - `qmd mcp` (stdio) now shuts down gracefully when stdin reaches EOF instead
   of orphaning to PID 1 when the parent MCP client dies (#751): the server
   closes its transport, gives in-flight request handlers a bounded window to
