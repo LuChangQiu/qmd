@@ -17,6 +17,23 @@
   `~/.config/qmd/*.yml`, including anything `qmd collection update-cmd` writes,
   are unaffected.
 
+- Indexing no longer follows file symlinks or glob `../` / absolute patterns
+  out of the collection directory. `fast-glob` already skipped symlinked
+  directories, but a file symlink (or a mask like `../**/*.md`) still resolved
+  via `realpath` and ingested the target. `qmd://` filesystem resolution uses
+  the same containment check, so `qmd://collection/../../../etc/passwd` no
+  longer produces a path outside the collection.
+
+- `qmd mcp --http` now validates the `Origin` and `Host` headers on every
+  request and answers `403` when they name anything but a loopback address
+  (#881). Binding to localhost is no defence against the user's own browser:
+  a page can re-point its hostname at `127.0.0.1` (DNS rebinding) and read
+  the indexed corpus through `POST /query` or `POST /mcp`. Requests with no
+  `Origin` (curl, MCP clients, editors) are unaffected. Extend the allowlists
+  with `QMD_ALLOWED_ORIGINS` / `QMD_ALLOWED_HOSTS`, or set
+  `QMD_ALLOWED_ORIGINS=*` behind your own authenticating proxy. A wildcard
+  bind (`--host 0.0.0.0`) skips the host check and warns at startup.
+
 ### Changed
 
 - Dependencies: `node-llama-cpp` 3.18.1 → **3.20.0** (llama.cpp b8390 → b10361, 2026-08-11). Also safe patch/minors: `picomatch` 4.0.4 → 4.0.5, `web-tree-sitter` 0.26.8 → 0.26.12, `tsx` 4.21.0 → 4.23.12, `vitest` 3.2.4 → 3.2.7. No zod/vitest major; `@modelcontextprotocol/server` stays 2.0.0 (no 2.x patch). `flake.nix` FOD hashes are not updated here.
