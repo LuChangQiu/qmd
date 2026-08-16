@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.8.3] - 2026-08-16
+
 ### Security
 
 - `qmd update` no longer runs a project-local `.qmd/index.yml`'s `update:`
